@@ -11,10 +11,10 @@
     <div id="chat"></div>
     <div id="input-container">
       <input type="file" id="imageInput" accept="image/*" capture="environment" style="display:none">
+      <img id="preview" src="" alt="Vista previa" style="display:none; max-width: 100%; margin-top: 10px;">
       <button onclick="document.getElementById('imageInput').click()">Abrir Cámara</button>
-      <button onclick="sendImage()">Enviar Imagen</button>
       <input type="text" id="prompt" placeholder="Escribe tu mensaje...">
-      <button onclick="sendMessage()">Enviar</button>
+      <button onclick="handleSend()">Enviar</button>
     </div>
   </div>
   <script src="script.js"></script>
