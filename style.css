@@ -88,3 +88,10 @@ button {
 button:hover {
   background-color: #1b5e20;
 }
+
+#preview {
+  border-radius: 10px;
+  max-height: 200px;
+  object-fit: contain;
+  margin-top: 10px;
+}
