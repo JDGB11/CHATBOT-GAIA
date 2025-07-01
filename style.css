@@ -18,6 +18,7 @@ body {
   flex-direction: column;
   padding: 15px;
   box-sizing: border-box;
+  height: 90vh;
 }
 
 #header {
@@ -36,8 +37,8 @@ body {
   padding: 10px;
   border-radius: 10px;
   overflow-y: auto;
-  max-height: 60vh;
   margin-bottom: 10px;
+  min-height: 300px;
 }
 
 .msg {
@@ -72,6 +73,15 @@ input[type="text"] {
   padding: 10px;
   border-radius: 8px;
   border: 1px solid #ccc;
+  height: auto;
+}
+
+input[type="text"]::placeholder {
+  color: #888;
+}
+
+input[type="text"]:focus {
+  outline: none;
 }
 
 button {
