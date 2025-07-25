@@ -1,108 +1,70 @@
-const apiKey = "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";
-const chatDiv = document.getElementById("chat");
-const imageInput = document.getElementById("imageInput");
-const previewImg = document.getElementById("preview");
-
-let messages = [
-  { role: "system", content: "Eres G.A.I.A., una inteligencia artificial amigable que responde preguntas en español." }
-];
-
-function appendMessage(content, role) {
-  const msg = document.createElement("div");
-  msg.className = "msg " + role;
-  msg.innerText = content;
-  chatDiv.appendChild(msg);
-  chatDiv.scrollTop = chatDiv.scrollHeight;
-}
-
-imageInput.addEventListener("change", () => {
-  const file = imageInput.files[0];
-  if (file) {
-    const reader = new FileReader();
-    reader.onload = () => {
-      previewImg.src = reader.result;
-      previewImg.style.display = "block";
-    };
-    reader.readAsDataURL(file);
-  }
-});
+const apiKey = "sk-proj-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"; // ← Solo para pruebas privadas
 
 async function handleSend() {
-  const input = document.getElementById("prompt");
-  const text = input.value.trim();
-  const file = imageInput.files[0];
+  const promptInput = document.getElementById("prompt");
+  const chatContainer = document.getElementById("chat");
+  const imageFile = document.getElementById("imageInput").files[0];
+  const prompt = promptInput.value.trim();
 
-  if (file) {
-    const reader = new FileReader();
-    reader.onloadend = async () => {
-      const base64Image = reader.result.split(",")[1];
-      appendMessage("[Imagen enviada]", "user");
+  if (!prompt && !imageFile) return;
 
-      try {
-        const response = await fetch("https://api.openai.com/v1/chat/completions", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${apiKey}`
-          },
-          body: JSON.stringify({
-            model: "gpt-4o",
-            messages: [
-              {
-                role: "user",
-                content: [
-                  { type: "text", text: "Describe esta imagen." },
-                  {
-                    type: "image_url",
-                    image_url: {
-                      url: `data:image/jpeg;base64,${base64Image}`
-                    }
-                  }
-                ]
-              }
-            ]
-          })
-        });
+  chatContainer.innerHTML += `<div class="user-message">${prompt || "[Imagen enviada]"}</div>`;
+  promptInput.value = "";
 
-        const data = await response.json();
-        const reply = data.choices[0].message.content;
-        appendMessage(reply, "bot");
-        imageInput.value = "";
-        previewImg.style.display = "none";
-      } catch (error) {
-        appendMessage("[Error al enviar imagen]", "bot");
-        console.error(error);
-      }
-    };
-    reader.readAsDataURL(file);
-  } else if (text) {
-    appendMessage(text, "user");
-    messages.push({ role: "user", content: text });
-    input.value = "";
+  const headers = {
+    "Authorization": `Bearer ${apiKey}`,
+    "Content-Type": "application/json",
+  };
 
-    try {
-      const response = await fetch("https://api.openai.com/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${apiKey}`
+  let body;
+
+  if (imageFile) {
+    const base64Image = await toBase64(imageFile);
+    body = JSON.stringify({
+      model: "gpt-4o",
+      messages: [
+        {
+          role: "user",
+          content: [
+            { type: "text", text: prompt || "¿Qué ves en esta imagen?" },
+            {
+              type: "image_url",
+              image_url: {
+                url: base64Image,
+              },
+            },
+          ],
         },
-        body: JSON.stringify({
-          model: "gpt-4o",
-          messages: messages,
-          temperature: 0.7
-        })
-      });
-
-      const data = await response.json();
-      const reply = data.choices[0].message.content;
-      appendMessage(reply, "bot");
-      messages.push({ role: "assistant", content: reply });
-    } catch (error) {
-      appendMessage("[Error de conexión]", "bot");
-      console.error(error);
-    }
+      ],
+    });
   } else {
-    alert("Por favor escribe un mensaje o selecciona una imagen.");
+    body = JSON.stringify({
+      model: "gpt-4o",
+      messages: [{ role: "user", content: prompt }],
+    });
   }
+
+  try {
+    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers,
+      body,
+    });
+
+    const data = await response.json();
+    const reply = data.choices?.[0]?.message?.content || "[Sin respuesta]";
+    chatContainer.innerHTML += `<div class="gaia-message">${reply}</div>`;
+  } catch (error) {
+    console.error(error);
+    chatContainer.innerHTML += `<div class="gaia-message error">Error al procesar la solicitud.</div>`;
+  }
+}
+
+function toBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
 }
