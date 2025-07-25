@@ -1,4 +1,4 @@
-const apiKey = "sk-proj-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"; // ← Solo para pruebas privadas
+const apiKey = "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"; // ← Solo para pruebas privadas
 
 async function handleSend() {
   const promptInput = document.getElementById("prompt");
